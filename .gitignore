@@ -1,0 +1,6 @@
+
+mymodules/__pycache__/
+
+mymodules/dist/
+
+mymodules/vsearch\.egg-info/
