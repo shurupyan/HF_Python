@@ -4,3 +4,5 @@ mymodules/__pycache__/
 mymodules/dist/
 
 mymodules/vsearch\.egg-info/
+
+chap5/__pycache__/
