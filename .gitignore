@@ -6,3 +6,5 @@ mymodules/dist/
 mymodules/vsearch\.egg-info/
 
 chap5/__pycache__/
+
+*.log
