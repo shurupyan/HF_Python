@@ -2,9 +2,14 @@ from flask import Flask, render_template, request
 from vsearch import search4letters
 from datetime import datetime
 from flask import escape
-import mysql.connector
+from DBcm import UseDatabase
 
 app = Flask(__name__)
+
+app.config['dbconfig'] = {'host': 'localhost',
+            'user': 'vsearch',
+            'password': 'vsearchpasswd',
+            'database': 'vsearchlogDB',}
 
 
 @app.route('/search4', methods=['POST', 'GET'])
@@ -26,22 +31,13 @@ def entry_page() -> 'html':
 
 @app.route('/viewlog')
 def view_the_log() -> 'str':
-    
-    dbconfig = {'host': 'localhost',
-		'user': 'vsearch',
-		'password': 'vsearchpasswd',
-		'database': 'vsearchlogDB',}
-    
-    conn = mysql.connector.connect(**dbconfig)
-    cursor = conn.cursor()
-    _SQL = """select ts, phrase, letters, ip, browser_string, results from log"""
-    cursor.execute(_SQL)    
-    contents = cursor.fetchall()    
 
-    cursor.close()
-    conn.close()
+    with UseDatabase(app.config['dbconfig']) as cursor:
+        _SQL = """select ts, phrase, letters, ip, browser_string, results from log"""
+        cursor.execute(_SQL)
+        contents = cursor.fetchall()
 
-    titles = ('Date', 'Form data', 'Remote_addr', 'User_agent', 'Results')    
+    titles = ('Date', 'Phrase', 'Letters', 'Remote_addr', 'User_agent', 'Results')    
     return render_template('viewlog.html',
                            the_title = 'View log',
                            the_row_titles = titles,
@@ -49,22 +45,17 @@ def view_the_log() -> 'str':
     
 
 def log_request(req: 'flask_request', res: str) ->None:
-    dbconfig = {'host': 'localhost',
-		'user': 'vsearch',
-		'password': 'vsearchpasswd',
-		'database': 'vsearchlogDB',}
-    
-    conn = mysql.connector.connect(**dbconfig)
-    cursor = conn.cursor()
-    _SQL = """insert into log
+
+    with UseDatabase(app.config['dbconfig']) as cursor:
+        _SQL = """insert into log
             (phrase, letters, ip, browser_string, results)
             values
             (%s, %s, %s, %s, %s)"""
-    cursor.execute(_SQL, (req.form['phrase'], req.form['letters'], req.remote_addr, req.user_agent.browser, res,))    
-    
-    conn.commit()
-    cursor.close()
-    conn.close()
+        cursor.execute(_SQL, (req.form['phrase'],
+                              req.form['letters'],
+                              req.remote_addr,
+                              req.user_agent.browser,
+                              res,))    
 
     
 if __name__ == '__main__':
