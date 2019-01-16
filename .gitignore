@@ -8,3 +8,5 @@ mymodules/vsearch\.egg-info/
 chap5/__pycache__/
 
 *.log
+
+chap10/__pycache__/
