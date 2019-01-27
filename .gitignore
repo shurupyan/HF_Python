@@ -10,3 +10,7 @@ chap5/__pycache__/
 *.log
 
 chap10/__pycache__/
+
+\.idea/
+
+chap12/__pycache__/
